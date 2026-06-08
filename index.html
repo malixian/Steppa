@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Steppa</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <aside class="sidebar" aria-label="Steppa navigation">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">S</div>
+          <div>
+            <p class="brand-name">Steppa</p>
+            <p class="brand-subtitle">VB-MAPP 训练跟踪</p>
+          </div>
+        </div>
+
+        <nav class="nav-list">
+          <a class="nav-item active" href="#profile">
+            <span class="nav-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-7 8a7 7 0 0 1 14 0"/></svg>
+            </span>
+            儿童档案
+          </a>
+          <a class="nav-item" href="#programs">
+            <span class="nav-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M5 4h14v16H5z"/><path d="M9 8h6M9 12h6M9 16h3"/></svg>
+            </span>
+            训练项目
+          </a>
+          <a class="nav-item" href="#progress">
+            <span class="nav-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M4 19V5"/><path d="M8 17v-6M13 17V7M18 17v-3"/></svg>
+            </span>
+            项目进度
+          </a>
+          <a class="nav-item" href="#overview">
+            <span class="nav-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 8-8"/><path d="M12 4v8h8"/></svg>
+            </span>
+            进度总览
+          </a>
+        </nav>
+      </aside>
+
+      <section class="workspace">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">训练总览</p>
+            <h1>儿童 VB-MAPP 能力进阶工作台</h1>
+          </div>
+          <button class="primary-action" type="button" id="recommendButton">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M5 10l7-7 7 7"/></svg>
+            下一步推荐
+          </button>
+        </header>
+
+        <section id="profile" class="profile-band">
+          <div class="profile-card">
+            <div class="avatar" aria-hidden="true">林</div>
+            <div class="profile-copy">
+              <p class="section-kicker">儿童档案</p>
+              <h2>林小舟，4岁2个月</h2>
+              <p>当前 VB-MAPP 等级：Level 2 · 18-30个月能力</p>
+            </div>
+          </div>
+          <div class="overall-panel">
+            <div>
+              <span class="metric-label">总体进度</span>
+              <strong id="overallProgress">0%</strong>
+            </div>
+            <div class="progress-track" aria-label="总体进度">
+              <span id="overallBar"></span>
+            </div>
+          </div>
+        </section>
+
+        <section id="overview" class="dashboard-grid">
+          <article class="panel wide">
+            <div class="panel-header">
+              <div>
+                <p class="section-kicker">进度总览</p>
+                <h2>各领域完成率</h2>
+              </div>
+              <div class="segmented" role="tablist" aria-label="Level filter">
+                <button class="segment active" type="button" data-level="all">全部</button>
+                <button class="segment" type="button" data-level="1">L1</button>
+                <button class="segment" type="button" data-level="2">L2</button>
+                <button class="segment" type="button" data-level="3">L3</button>
+              </div>
+            </div>
+            <div class="domain-list" id="domainList"></div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-header">
+              <div>
+                <p class="section-kicker">当前缺失技能</p>
+                <h2>优先补齐</h2>
+              </div>
+            </div>
+            <ul class="skill-list" id="missingSkills"></ul>
+          </article>
+
+          <article class="panel">
+            <div class="panel-header">
+              <div>
+                <p class="section-kicker">最近进步项目</p>
+                <h2>本周变化</h2>
+              </div>
+            </div>
+            <ul class="activity-list" id="recentWins"></ul>
+          </article>
+        </section>
+
+        <section id="programs" class="panel program-panel">
+          <div class="panel-header">
+            <div>
+              <p class="section-kicker">训练项目</p>
+              <h2>按 VB-MAPP Level 查看项目</h2>
+            </div>
+            <label class="search-box">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.3-4.3"/><circle cx="11" cy="11" r="7"/></svg>
+              <input id="programSearch" type="search" placeholder="搜索领域或项目" />
+            </label>
+          </div>
+          <div class="level-columns" id="programColumns"></div>
+        </section>
+
+        <section id="progress" class="panel progress-panel">
+          <div class="panel-header">
+            <div>
+              <p class="section-kicker">项目进度</p>
+              <h2>状态流转</h2>
+            </div>
+          </div>
+          <div class="status-board" id="statusBoard"></div>
+        </section>
+
+        <section class="recommendation-strip" aria-live="polite" id="recommendationStrip">
+          <div>
+            <p class="section-kicker">下一步推荐项目</p>
+            <h2 id="recommendationTitle">等待生成推荐</h2>
+          </div>
+          <p id="recommendationReason">点击右上角按钮，根据未掌握项目和领域完成率生成下一步训练建议。</p>
+        </section>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
