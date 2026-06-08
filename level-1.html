@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Steppa · Level 1</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body data-level-page="1">
+    <main class="shell">
+      <aside class="sidebar" aria-label="Steppa navigation">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">S</div>
+          <div>
+            <p class="brand-name">Steppa</p>
+            <p class="brand-subtitle">VB-MAPP 训练跟踪</p>
+          </div>
+        </div>
+        <nav class="nav-list">
+          <a class="nav-item" href="index.html#programs">训练项目</a>
+          <a class="nav-item active" href="level-1.html">Level 1</a>
+          <a class="nav-item" href="level-2.html">Level 2</a>
+          <a class="nav-item" href="level-3.html">Level 3</a>
+        </nav>
+      </aside>
+
+      <section class="workspace">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">0-18个月能力</p>
+            <h1>Level 1 训练项目</h1>
+          </div>
+          <a class="primary-action" href="index.html#programs">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+            返回总览
+          </a>
+        </header>
+
+        <section id="programs" class="panel program-panel">
+          <div class="panel-header">
+            <div>
+              <p class="section-kicker">分类项目</p>
+              <h2>按领域查看 Level 1</h2>
+            </div>
+            <label class="search-box">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.3-4.3"/><circle cx="11" cy="11" r="7"/></svg>
+              <input id="programSearch" type="search" placeholder="搜索领域或项目" />
+            </label>
+          </div>
+          <div class="level-detail" id="programColumns"></div>
+        </section>
+      </section>
+    </main>
+    <script src="app.js"></script>
+  </body>
+</html>
