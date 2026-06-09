@@ -399,6 +399,11 @@ const programs = Object.entries(levelDomains).flatMap(([level, domains]) =>
 
 let activeLevel = "all";
 const pageLevel = Number(document.body.dataset.levelPage || 0);
+const isCategoryPage = document.body.dataset.categoryPage === "true";
+const categoryDomain =
+  typeof window === "undefined"
+    ? ""
+    : new URLSearchParams(window.location.search).get("domain") || "";
 
 const domainList = document.querySelector("#domainList");
 const domainDetailPanel = document.querySelector("#domainDetailPanel");
@@ -420,8 +425,32 @@ const profileForm = document.querySelector("#profileForm");
 const childNameInput = document.querySelector("#childNameInput");
 const childAgeInput = document.querySelector("#childAgeInput");
 const childLevelInput = document.querySelector("#childLevelInput");
+const resetProgressButton = document.querySelector("#resetProgressButton");
+const resetProgressDialog = document.querySelector("#resetProgressDialog");
+const resetConfirmHint = document.querySelector("#resetConfirmHint");
+const resetConfirmInput = document.querySelector("#resetConfirmInput");
+const resetConfirmError = document.querySelector("#resetConfirmError");
+const cancelResetButton = document.querySelector("#cancelResetButton");
+const confirmResetButton = document.querySelector("#confirmResetButton");
+const aiRecommendationForm = document.querySelector("#aiRecommendationForm");
+const aiConfigForm = document.querySelector("#aiConfigForm");
+const aiProviderInput = document.querySelector("#aiProviderInput");
+const aiEndpointInput = document.querySelector("#aiEndpointInput");
+const aiModelInput = document.querySelector("#aiModelInput");
+const aiKeyInput = document.querySelector("#aiKeyInput");
+const vbmappImageInput = document.querySelector("#vbmappImageInput");
+const aiRecommendationStatus = document.querySelector("#aiRecommendationStatus");
+const aiRecommendationResults = document.querySelector("#aiRecommendationResults");
+const aiRequestStatus = document.querySelector("#aiRequestStatus");
+const aiRequestPhase = document.querySelector("#aiRequestPhase");
+const aiRequestTimer = document.querySelector("#aiRequestTimer");
+const runRecommendationButton = document.querySelector("#runRecommendationButton");
+const aiRecommendationHistory = document.querySelector("#aiRecommendationHistory");
 const profileStorageKey = "steppa.childProfile";
 const progressStorageKey = "steppa.taskProgress";
+const progressResetKey = "steppa.progressReset";
+const aiConfigStorageKey = "steppa.aiRecommendationConfig";
+const aiHistoryStorageKey = "steppa.aiRecommendationHistory";
 let selectedDomain = "";
 
 function buildUpdate(level, domain, index) {
@@ -438,6 +467,7 @@ function buildUpdate(level, domain, index) {
 function filteredPrograms() {
   const query = searchInput ? searchInput.value.trim().toLowerCase() : "";
   return programs.filter((program) => {
+    if (isCategoryPage && program.domain !== categoryDomain) return false;
     const levelMatch = pageLevel
       ? program.level === pageLevel
       : activeLevel === "all" || String(program.level) === activeLevel;
@@ -465,6 +495,14 @@ function saveProgressOverride(taskId, blocks) {
   const overrides = loadProgressOverrides();
   overrides[taskId] = blocks;
   localStorage.setItem(progressStorageKey, JSON.stringify(overrides));
+  localStorage.removeItem(progressResetKey);
+}
+
+function resetAllProgress() {
+  const resetProgress = Object.fromEntries(programs.map((item) => [item.id, 0]));
+  localStorage.setItem(progressStorageKey, JSON.stringify(resetProgress));
+  localStorage.setItem(progressResetKey, "true");
+  render();
 }
 
 function completionBlocksFor(item) {
@@ -493,11 +531,11 @@ function completionBlockMarkup(item, interactive = false) {
 }
 
 function renderOverview(items) {
-  if (!domainList || !missingSkills || !recentWins || !overallProgress || !overallBar) return;
-
   const overall = completionFor(programs);
-  overallProgress.textContent = `${overall}%`;
-  overallBar.style.width = `${overall}%`;
+  if (overallProgress) overallProgress.textContent = `${overall}%`;
+  if (overallBar) overallBar.style.width = `${overall}%`;
+
+  if (!domainList || !missingSkills || !recentWins) return;
 
   const domains = [...new Set(items.map((item) => item.domain))].sort((a, b) =>
     a.localeCompare(b, "zh-CN"),
@@ -507,21 +545,14 @@ function renderOverview(items) {
       const domainItems = items.filter((item) => item.domain === domain);
       const score = completionFor(domainItems);
       return `
-        <button class="domain-row" type="button" data-domain="${domain}">
+        <a class="domain-row" href="category.html?domain=${encodeURIComponent(domain)}">
           <span class="domain-name">${domain}</span>
           <div class="progress-track"><span style="width:${score}%"></span></div>
           <span class="domain-score">${score}%</span>
-        </button>
+        </a>
       `;
     })
     .join("");
-
-  domainList.querySelectorAll(".domain-row").forEach((button) => {
-    button.addEventListener("click", () => {
-      selectedDomain = button.dataset.domain;
-      renderDomainDetail(items);
-    });
-  });
 
   if (selectedDomain) renderDomainDetail(items);
 
@@ -567,7 +598,11 @@ function renderDomainDetail(items) {
     )
     .join("");
 
-  domainDetailList.querySelectorAll(".completion-block").forEach((button) => {
+  bindCompletionButtons(domainDetailList);
+}
+
+function bindCompletionButtons(container) {
+  container.querySelectorAll(".completion-block").forEach((button) => {
     button.addEventListener("click", () => {
       const task = programs.find((item) => item.id === button.dataset.taskId);
       if (!task) return;
@@ -591,13 +626,14 @@ function loadProfile() {
 }
 
 function renderProfile() {
-  if (!profileNameLine || !profileLevelLine || !profileAvatar) return;
-
   const profile = loadProfile();
-  const level = levelMeta[profile.level] || levelMeta[2];
-  profileNameLine.textContent = `${profile.name}，${profile.age}`;
-  profileLevelLine.textContent = `当前 VB-MAPP 等级：${level.label} · ${level.age}`;
-  profileAvatar.textContent = (profile.name || "S").trim().slice(0, 1);
+
+  if (profileNameLine && profileLevelLine && profileAvatar) {
+    const level = levelMeta[profile.level] || levelMeta[2];
+    profileNameLine.textContent = `${profile.name}，${profile.age}`;
+    profileLevelLine.textContent = `当前 VB-MAPP 等级：${level.label} · ${level.age}`;
+    profileAvatar.textContent = (profile.name || "S").trim().slice(0, 1);
+  }
 
   if (childNameInput) childNameInput.value = profile.name;
   if (childAgeInput) childAgeInput.value = profile.age;
@@ -619,14 +655,498 @@ function bindProfileForm() {
   });
 }
 
+function bindResetProgress() {
+  if (!resetProgressButton || !resetProgressDialog || !resetConfirmInput || !confirmResetButton) return;
+
+  resetProgressButton.addEventListener("click", () => {
+    const profile = loadProfile();
+    const confirmText = `${profile.name}确认重置`;
+    if (resetConfirmHint) {
+      resetConfirmHint.textContent = `请输入“${confirmText}”以清空所有项目进度方格。`;
+    }
+    if (resetConfirmError) resetConfirmError.hidden = true;
+    resetConfirmInput.value = "";
+    resetProgressDialog.showModal();
+    resetConfirmInput.focus();
+  });
+
+  cancelResetButton?.addEventListener("click", () => {
+    resetProgressDialog.close();
+  });
+
+  confirmResetButton.addEventListener("click", () => {
+    const profile = loadProfile();
+    const confirmText = `${profile.name}确认重置`;
+    if (resetConfirmInput.value.trim() !== confirmText) {
+      if (resetConfirmError) resetConfirmError.hidden = false;
+      return;
+    }
+
+    resetAllProgress();
+    resetProgressDialog.close();
+  });
+}
+
+const aiProviderDefaults = {
+  qwen: {
+    endpoint: "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
+    model: "qwen-vl-plus",
+  },
+  deepseek: {
+    endpoint: "https://api.deepseek.com/chat/completions",
+    model: "deepseek-chat",
+  },
+  custom: {
+    endpoint: "",
+    model: "",
+  },
+};
+
+function candidateProjectText() {
+  return programs.map((item) => `${item.id}｜Level ${item.level}｜${item.domain}｜${item.title}`).join("\n");
+}
+
+function fileToDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function loadAiConfig() {
+  try {
+    return JSON.parse(localStorage.getItem(aiConfigStorageKey) || "{}");
+  } catch {
+    return {};
+  }
+}
+
+function saveAiConfig(config) {
+  localStorage.setItem(aiConfigStorageKey, JSON.stringify(config));
+}
+
+function applyProviderDefaults(provider) {
+  const saved = loadAiConfig();
+  const defaults = aiProviderDefaults[provider] || aiProviderDefaults.qwen;
+  if (aiEndpointInput) aiEndpointInput.value = saved.endpoint || defaults.endpoint;
+  if (aiModelInput) aiModelInput.value = saved.model || defaults.model;
+  if (aiKeyInput) aiKeyInput.value = saved.apiKey || "";
+}
+
+function extractJsonText(text) {
+  const value = String(text || "").trim();
+  const fenced = value.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  if (fenced) return fenced[1].trim();
+
+  const start = value.indexOf("{");
+  const end = value.lastIndexOf("}");
+  if (start >= 0 && end > start) return value.slice(start, end + 1);
+
+  return value;
+}
+
+function parseAiRecommendationPayload(text) {
+  try {
+    const parsed = JSON.parse(extractJsonText(text));
+    const candidates = Array.isArray(parsed) ? parsed : parsed.recommendations || parsed.items || parsed.ids || [];
+    return {
+      items: candidates.map((item) => (typeof item === "string" ? { id: item, reason: "" } : item)),
+      feedback: parsed.feedback || parsed.summary || parsed.analysis || parsed.reason || "",
+    };
+  } catch {
+    return {
+      items: extractRecommendedIds(text).map((id) => ({ id, reason: "" })),
+      feedback: text,
+    };
+  }
+}
+
+function normalizedAiRecommendations(rawText = "") {
+  const parsed = parseAiRecommendationPayload(rawText);
+  const knownIds = new Set(programs.map((item) => item.id));
+  const seen = new Set();
+  const items = [];
+
+  for (const item of parsed.items) {
+    if (!knownIds.has(item.id) || seen.has(item.id)) continue;
+    seen.add(item.id);
+    items.push({
+      id: item.id,
+      reason: item.reason || item.recommendation_reason || item.why || item.explanation || item["推荐理由"] || item["原因"] || "",
+    });
+  }
+
+  return {
+    items: items.slice(0, 5),
+    feedback: parsed.feedback || rawText,
+  };
+}
+
+function renderAiRecommendations(rawText = "") {
+  if (!aiRecommendationResults) return;
+
+  const parsed = normalizedAiRecommendations(rawText);
+  const recommended = parsed.items
+    .map(({ id, reason }) => {
+      const program = programs.find((item) => item.id === id);
+      return program ? { program, reason } : null;
+    })
+    .filter(Boolean);
+
+  const feedback = parsed.feedback || rawText;
+  const feedbackBlock = `
+    <section class="ai-feedback">
+      <p class="section-kicker">模型反馈</p>
+      <div class="ai-feedback-body">${escapeHtml(feedback || "模型未返回额外说明。")}</div>
+    </section>
+  `;
+
+  if (!recommended.length) {
+    aiRecommendationResults.innerHTML = `
+      <p class="empty-note">没有识别到可匹配的候选项目 id。</p>
+      ${feedbackBlock}
+    `;
+    return;
+  }
+
+  aiRecommendationResults.innerHTML = `
+    <div class="recommended-card-list">
+      ${recommended
+        .map(
+          ({ program, reason }, index) => `
+        <article class="domain-task recommended-project-card">
+          <div>
+            <span class="recommendation-rank">推荐 ${index + 1}</span>
+            <strong>${program.title}</strong>
+            <span class="program-domain">${program.id} · Level ${program.level} · ${program.domain}</span>
+            <span class="recommendation-reason">${escapeHtml(reason || "模型未返回此项目的单独原因。")}</span>
+          </div>
+          ${completionBlockMarkup(program, true)}
+        </article>
+      `,
+        )
+        .join("")}
+    </div>
+    ${feedbackBlock}
+  `;
+  bindCompletionButtons(aiRecommendationResults);
+}
+
+function loadRecommendationHistory() {
+  try {
+    return JSON.parse(localStorage.getItem(aiHistoryStorageKey) || "[]");
+  } catch {
+    return [];
+  }
+}
+
+function saveRecommendationHistoryEntry(entry) {
+  const history = loadRecommendationHistory();
+  history.unshift(entry);
+  localStorage.setItem(aiHistoryStorageKey, JSON.stringify(history.slice(0, 20)));
+  renderRecommendationHistory();
+}
+
+function renderRecommendationHistory() {
+  if (!aiRecommendationHistory) return;
+
+  const history = loadRecommendationHistory();
+  if (!history.length) {
+    aiRecommendationHistory.innerHTML = '<p class="empty-note">暂无推荐历史。</p>';
+    return;
+  }
+
+  aiRecommendationHistory.innerHTML = history
+    .map((entry) => {
+      const items = entry.items
+        .map(({ id, reason }) => {
+          const program = programs.find((item) => item.id === id);
+          if (!program) return "";
+          return `<li><strong>${program.title}</strong><span class="program-domain">${id} · Level ${program.level} · ${program.domain}</span>${reason ? `<span class="recommendation-reason">${escapeHtml(reason)}</span>` : ""}</li>`;
+        })
+        .join("");
+
+      return `
+        <article class="history-card">
+          <div class="history-card-header">
+            <strong>${escapeHtml(entry.createdAt)}</strong>
+            <span>${entry.items.length} 项</span>
+          </div>
+          <ul>${items}</ul>
+        </article>
+      `;
+    })
+    .join("");
+}
+
+function extractRecommendedIds(text) {
+  const knownIds = new Set(programs.map((item) => item.id));
+  const ids = [];
+
+  try {
+    const parsed = JSON.parse(extractJsonText(text));
+    const candidates = Array.isArray(parsed) ? parsed : parsed.recommendations || parsed.items || parsed.ids || [];
+    for (const item of candidates) {
+      const id = typeof item === "string" ? item : item.id;
+      if (knownIds.has(id)) ids.push(id);
+    }
+  } catch {
+    for (const match of text.matchAll(/\bl\d+-d\d+-t\d+\b/g)) {
+      if (knownIds.has(match[0])) ids.push(match[0]);
+    }
+  }
+
+  return ids;
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function setAiRequestState({ active, phase, seconds = 0 }) {
+  if (aiRequestStatus) aiRequestStatus.hidden = !active;
+  if (aiRequestPhase && phase) aiRequestPhase.textContent = phase;
+  if (aiRequestTimer) aiRequestTimer.textContent = `已等待 ${seconds} 秒`;
+  if (runRecommendationButton) {
+    runRecommendationButton.disabled = active;
+    runRecommendationButton.textContent = active ? "请求中..." : "生成推荐";
+  }
+}
+
+async function requestAiRecommendation(event) {
+  event.preventDefault();
+  if (!vbmappImageInput?.files?.[0]) {
+    if (aiRecommendationStatus) aiRecommendationStatus.textContent = "请先上传 VB-MAPP 截图";
+    return;
+  }
+
+  const savedConfig = loadAiConfig();
+  const provider = savedConfig.provider || "qwen";
+  const defaults = aiProviderDefaults[provider] || aiProviderDefaults.qwen;
+  const config = {
+    provider,
+    endpoint: savedConfig.endpoint || defaults.endpoint,
+    model: savedConfig.model || defaults.model,
+    apiKey: savedConfig.apiKey || "",
+  };
+
+  if (!config.endpoint || !config.model || !config.apiKey) {
+    if (aiRecommendationStatus) aiRecommendationStatus.textContent = "请填写 API 地址、模型和 API Key";
+    return;
+  }
+
+  if (aiRecommendationStatus) aiRecommendationStatus.textContent = "请求已开始";
+  if (aiRecommendationResults) aiRecommendationResults.innerHTML = "";
+  setAiRequestState({ active: true, phase: "正在读取截图", seconds: 0 });
+
+  const imageUrl = await fileToDataUrl(vbmappImageInput.files[0]);
+  setAiRequestState({ active: true, phase: "截图已读取，正在连接模型 API", seconds: 0 });
+  const prompt = `你是 VB-MAPP 训练项目推荐助手。请根据用户上传的 VB-MAPP 截图，以及下面的当前候选项目列表，推荐最适合作为下一步训练的候选项目。
+
+要求：
+1. 只能从候选项目中选择。
+2. 必须返回候选项目 id。
+3. 至少推荐 5 个候选项目；如果截图信息不足，也必须根据最可能的缺失技能推荐 5 个。
+4. 优先推荐截图中缺失、低分、未掌握或需要继续训练的项目。
+5. 返回 JSON，格式为 {"feedback":"整体反馈","recommendations":[{"id":"项目id","reason":"推荐理由"}]}。
+
+候选项目列表：
+${candidateProjectText()}
+
+最终输出要求：recommendations 数组必须正好 5 项。`;
+
+  const body = {
+    model: config.model,
+    messages: [
+      {
+        role: "user",
+        content: [
+          { type: "text", text: prompt },
+          { type: "image_url", image_url: { url: imageUrl } },
+        ],
+      },
+    ],
+    temperature: 0.2,
+  };
+
+  const controller = new AbortController();
+  let seconds = 0;
+  const timeoutSeconds = 90;
+  const timer = window.setInterval(() => {
+    seconds += 1;
+    const phase =
+      seconds < 8
+        ? "正在发送请求"
+        : seconds < 30
+          ? "模型正在分析截图"
+          : seconds < timeoutSeconds
+            ? "仍在等待模型返回"
+            : "请求即将超时";
+    setAiRequestState({ active: true, phase, seconds });
+  }, 1000);
+  const timeout = window.setTimeout(() => controller.abort(), timeoutSeconds * 1000);
+
+  try {
+    const response = await fetch(config.endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${config.apiKey}`,
+      },
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    });
+
+    setAiRequestState({ active: true, phase: "模型已返回，正在解析结果", seconds });
+    const payload = await response.json();
+    if (!response.ok) {
+      throw new Error(payload.error?.message || payload.message || `API 请求失败：${response.status}`);
+    }
+
+    const content = payload.choices?.[0]?.message?.content || JSON.stringify(payload);
+    const ids = extractRecommendedIds(content);
+    if (aiRecommendationStatus) {
+      aiRecommendationStatus.textContent =
+        ids.length >= 5 ? `模型返回 ${ids.length} 个可匹配项目` : `模型只返回 ${ids.length} 个可匹配项目，少于 5 个`;
+    }
+    renderAiRecommendations(content);
+    const normalized = normalizedAiRecommendations(content);
+    saveRecommendationHistoryEntry({
+      createdAt: new Date().toLocaleString("zh-CN"),
+      items: normalized.items,
+      feedback: normalized.feedback,
+      rawText: content,
+      provider: config.provider,
+      model: config.model,
+    });
+  } catch (error) {
+    const aborted = error.name === "AbortError";
+    if (aiRecommendationStatus) aiRecommendationStatus.textContent = aborted ? "请求超时" : "推荐失败";
+    if (aiRecommendationResults) {
+      aiRecommendationResults.innerHTML = `<p class="form-error">${escapeHtml(aborted ? "请求超过 90 秒未返回。请检查网络、模型接口或稍后重试。" : error.message)}</p>`;
+    }
+  } finally {
+    window.clearInterval(timer);
+    window.clearTimeout(timeout);
+    setAiRequestState({ active: false, phase: "", seconds });
+  }
+}
+
+function bindAiRecommendation() {
+  if (!aiRecommendationForm) return;
+
+  const saved = loadAiConfig();
+  if (aiProviderInput) aiProviderInput.value = saved.provider || "qwen";
+  applyProviderDefaults(aiProviderInput?.value || "qwen");
+
+  aiProviderInput?.addEventListener("change", () => {
+    const defaults = aiProviderDefaults[aiProviderInput.value] || aiProviderDefaults.qwen;
+    aiEndpointInput.value = defaults.endpoint;
+    aiModelInput.value = defaults.model;
+  });
+
+  aiRecommendationForm.addEventListener("submit", requestAiRecommendation);
+  renderRecommendationHistory();
+}
+
+function bindAiConfig() {
+  if (!aiConfigForm) return;
+
+  const saved = loadAiConfig();
+  if (aiProviderInput) aiProviderInput.value = saved.provider || "qwen";
+  applyProviderDefaults(aiProviderInput?.value || "qwen");
+
+  aiProviderInput?.addEventListener("change", () => {
+    const defaults = aiProviderDefaults[aiProviderInput.value] || aiProviderDefaults.qwen;
+    if (aiEndpointInput) aiEndpointInput.value = defaults.endpoint;
+    if (aiModelInput) aiModelInput.value = defaults.model;
+  });
+
+  aiConfigForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    saveAiConfig({
+      provider: aiProviderInput?.value || "qwen",
+      endpoint: aiEndpointInput?.value.trim() || "",
+      model: aiModelInput?.value.trim() || "",
+      apiKey: aiKeyInput?.value.trim() || "",
+    });
+
+    const status = document.querySelector("#aiConfigStatus");
+    if (status) status.textContent = "模型配置已保存。";
+  });
+}
+
 function renderPrograms(items) {
   if (!programColumns) return;
+  if (isCategoryPage) {
+    renderCategoryDetailPage(items);
+    return;
+  }
+
   if (pageLevel) {
     renderLevelDetail(items);
     return;
   }
 
   renderLevelOverview();
+}
+
+function renderCategoryDetailPage(items) {
+  const title = document.querySelector("#categoryTitle");
+  const subtitle = document.querySelector("#categorySubtitle");
+  const score = completionFor(items);
+
+  if (title) title.textContent = categoryDomain || "分类详情";
+  if (subtitle) subtitle.textContent = `${items.length} 个子任务 · 完成率 ${score}%`;
+
+  if (!categoryDomain) {
+    programColumns.innerHTML = '<p class="empty-note">没有选择分类。</p>';
+    return;
+  }
+
+  const levels = Object.entries(levelMeta).map(([id, meta]) => ({ id: Number(id), ...meta }));
+  programColumns.innerHTML = levels
+    .map((level) => {
+      const levelItems = items.filter((item) => item.level === level.id);
+      if (!levelItems.length) return "";
+
+      return `
+        <section class="domain-section">
+          <div class="domain-section-header">
+            <div>
+              <span class="section-kicker">${level.age}</span>
+              <h3>${level.label}</h3>
+            </div>
+            <strong>${completionFor(levelItems)}%</strong>
+          </div>
+          <div class="domain-program-list">
+            ${levelItems
+              .map(
+                (item) => `
+                  <article class="domain-task">
+                    <div>
+                      <strong>${item.title}</strong>
+                      <span class="program-domain">Level ${item.level} · ${item.status}</span>
+                    </div>
+                    ${completionBlockMarkup(item, true)}
+                  </article>
+                `,
+              )
+              .join("")}
+          </div>
+        </section>
+      `;
+    })
+    .join("");
+
+  bindCompletionButtons(programColumns);
 }
 
 function renderLevelOverview() {
@@ -752,5 +1272,8 @@ document.querySelectorAll(".segment").forEach((button) => {
 if (searchInput) searchInput.addEventListener("input", render);
 document.querySelector("#recommendButton")?.addEventListener("click", recommendNext);
 bindProfileForm();
+bindResetProgress();
+bindAiRecommendation();
+bindAiConfig();
 
 render();

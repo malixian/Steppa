@@ -4,8 +4,13 @@ $root = Split-Path -Parent $PSScriptRoot
 $destination = Join-Path $PSScriptRoot "Steppa\Web"
 $files = @(
   "index.html",
+  "overview.html",
+  "progress.html",
+  "programs.html",
+  "recommendation.html",
   "styles.css",
   "app.js",
+  "category.html",
   "level-1.html",
   "level-2.html",
   "level-3.html"

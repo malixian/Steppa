@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Steppa · 进度总览</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <aside class="sidebar" aria-label="Steppa navigation">
+        <nav class="nav-list">
+          <a class="nav-item" href="recommendation.html">
+            <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3v3"/><path d="M21 12h-3"/><path d="M6 12H3"/><path d="m8 21 4-9 4 9"/><path d="M9.5 17h5"/></svg></span>
+            项目推荐
+          </a>
+          <a class="nav-item active" href="overview.html">
+            <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 8-8"/><path d="M12 4v8h8"/></svg></span>
+            进度总览
+          </a>
+          <a class="nav-item" href="programs.html">
+            <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 4h14v16H5z"/><path d="M9 8h6M9 12h6M9 16h3"/></svg></span>
+            训练汇总
+          </a>
+          <a class="nav-item" href="index.html">
+            <span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-7 8a7 7 0 0 1 14 0"/></svg></span>
+            我的
+          </a>
+        </nav>
+      </aside>
+
+      <section class="workspace">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">进度总览</p>
+            <h1>各领域完成率</h1>
+          </div>
+        </header>
+
+        <section id="overview" class="dashboard-grid">
+          <article class="panel wide">
+            <div class="panel-header">
+              <div>
+                <p class="section-kicker">领域进度</p>
+                <h2>点击类别查看全部子任务</h2>
+              </div>
+              <div class="segmented" role="tablist" aria-label="Level filter">
+                <button class="segment active" type="button" data-level="all">全部</button>
+                <button class="segment" type="button" data-level="1">L1</button>
+                <button class="segment" type="button" data-level="2">L2</button>
+                <button class="segment" type="button" data-level="3">L3</button>
+              </div>
+            </div>
+            <div class="domain-list" id="domainList"></div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-header">
+              <div>
+                <p class="section-kicker">当前缺失技能</p>
+                <h2>优先补齐</h2>
+              </div>
+            </div>
+            <ul class="skill-list" id="missingSkills"></ul>
+          </article>
+
+          <article class="panel">
+            <div class="panel-header">
+              <div>
+                <p class="section-kicker">最近进步项目</p>
+                <h2>本周变化</h2>
+              </div>
+            </div>
+            <ul class="activity-list" id="recentWins"></ul>
+          </article>
+        </section>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>

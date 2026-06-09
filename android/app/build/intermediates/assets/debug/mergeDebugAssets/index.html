@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Steppa · 我的</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <aside class="sidebar" aria-label="Steppa navigation">
+        <nav class="nav-list">
+          <a class="nav-item" href="recommendation.html">
+            <span class="nav-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M12 3v3"/><path d="M21 12h-3"/><path d="M6 12H3"/><path d="m8 21 4-9 4 9"/><path d="M9.5 17h5"/></svg>
+            </span>
+            项目推荐
+          </a>
+          <a class="nav-item" href="overview.html">
+            <span class="nav-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 8-8"/><path d="M12 4v8h8"/></svg>
+            </span>
+            进度总览
+          </a>
+          <a class="nav-item" href="progress.html">
+            <span class="nav-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M4 19V5"/><path d="M8 17v-6M13 17V7M18 17v-3"/></svg>
+            </span>
+            项目进度
+          </a>
+          <a class="nav-item" href="programs.html">
+            <span class="nav-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M5 4h14v16H5z"/><path d="M9 8h6M9 12h6M9 16h3"/></svg>
+            </span>
+            训练汇总
+          </a>
+          <a class="nav-item active" href="index.html">
+            <span class="nav-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-7 8a7 7 0 0 1 14 0"/></svg>
+            </span>
+            我的
+          </a>
+        </nav>
+      </aside>
+
+      <section class="workspace">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">我的</p>
+            <h1>基础信息与模型配置</h1>
+          </div>
+        </header>
+
+        <section id="profile" class="profile-band">
+          <form class="profile-form" id="profileForm">
+            <label>
+              姓名
+              <input id="childNameInput" type="text" autocomplete="off" />
+            </label>
+            <label>
+              年龄
+              <input id="childAgeInput" type="text" autocomplete="off" />
+            </label>
+            <label>
+              当前等级
+              <select id="childLevelInput">
+                <option value="1">Level 1</option>
+                <option value="2">Level 2</option>
+                <option value="3">Level 3</option>
+              </select>
+            </label>
+            <button class="secondary-action" type="submit">保存</button>
+          </form>
+          <a class="overall-panel overall-link" href="overview.html" aria-label="查看进度总览">
+            <div>
+              <span class="metric-label">总体进度</span>
+              <strong id="overallProgress">0%</strong>
+            </div>
+            <div class="progress-track" aria-label="总体进度">
+              <span id="overallBar"></span>
+            </div>
+          </a>
+          <button class="danger-action" type="button" id="resetProgressButton">重置全部项目进度</button>
+        </section>
+
+        <section class="panel recommendation-config">
+          <div class="panel-header">
+            <div>
+              <p class="section-kicker">模型配置</p>
+              <h2>国产大模型 API</h2>
+            </div>
+          </div>
+
+          <form class="ai-form" id="aiConfigForm">
+            <label>
+              服务商
+              <select id="aiProviderInput">
+                <option value="qwen">Qwen-VL / DashScope</option>
+                <option value="deepseek">DeepSeek</option>
+                <option value="custom">自定义 OpenAI 兼容接口</option>
+              </select>
+            </label>
+            <label>
+              API 地址
+              <input id="aiEndpointInput" type="url" autocomplete="off" />
+            </label>
+            <label>
+              模型
+              <input id="aiModelInput" type="text" autocomplete="off" />
+            </label>
+            <label>
+              API Key
+              <input id="aiKeyInput" type="password" autocomplete="off" placeholder="仅保存在本机" />
+            </label>
+            <button class="secondary-action" type="submit">保存模型配置</button>
+          </form>
+          <p class="empty-note" id="aiConfigStatus">推荐页会使用这里保存的模型配置。</p>
+        </section>
+
+        <dialog class="reset-dialog" id="resetProgressDialog">
+          <form method="dialog" class="reset-dialog-body">
+            <div>
+              <p class="section-kicker">确认重置</p>
+              <h2>清空所有项目进度方格</h2>
+              <p class="empty-note" id="resetConfirmHint">请输入确认文本后继续。</p>
+            </div>
+            <label>
+              确认文本
+              <input id="resetConfirmInput" type="text" autocomplete="off" />
+            </label>
+            <p class="form-error" id="resetConfirmError" hidden>确认文本不匹配。</p>
+            <div class="dialog-actions">
+              <button class="secondary-action" type="button" id="cancelResetButton">取消</button>
+              <button class="danger-action" type="button" id="confirmResetButton">确认重置</button>
+            </div>
+          </form>
+        </dialog>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>

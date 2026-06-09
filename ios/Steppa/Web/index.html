@@ -3,44 +3,36 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Steppa</title>
+    <title>Steppa · 我的</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <main class="shell">
       <aside class="sidebar" aria-label="Steppa navigation">
-        <div class="brand">
-          <div class="brand-mark" aria-hidden="true">S</div>
-          <div>
-            <p class="brand-name">Steppa</p>
-            <p class="brand-subtitle">VB-MAPP 训练跟踪</p>
-          </div>
-        </div>
-
         <nav class="nav-list">
-          <a class="nav-item active" href="#profile">
+          <a class="nav-item" href="recommendation.html">
             <span class="nav-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-7 8a7 7 0 0 1 14 0"/></svg>
+              <svg viewBox="0 0 24 24"><path d="M12 3v3"/><path d="M21 12h-3"/><path d="M6 12H3"/><path d="m8 21 4-9 4 9"/><path d="M9.5 17h5"/></svg>
             </span>
-            儿童档案
+            项目推荐
           </a>
-          <a class="nav-item" href="#programs">
-            <span class="nav-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24"><path d="M5 4h14v16H5z"/><path d="M9 8h6M9 12h6M9 16h3"/></svg>
-            </span>
-            训练项目
-          </a>
-          <a class="nav-item" href="#progress">
-            <span class="nav-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24"><path d="M4 19V5"/><path d="M8 17v-6M13 17V7M18 17v-3"/></svg>
-            </span>
-            项目进度
-          </a>
-          <a class="nav-item" href="#overview">
+          <a class="nav-item" href="overview.html">
             <span class="nav-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 8-8"/><path d="M12 4v8h8"/></svg>
             </span>
             进度总览
+          </a>
+          <a class="nav-item" href="programs.html">
+            <span class="nav-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M5 4h14v16H5z"/><path d="M9 8h6M9 12h6M9 16h3"/></svg>
+            </span>
+            训练汇总
+          </a>
+          <a class="nav-item active" href="index.html">
+            <span class="nav-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-7 8a7 7 0 0 1 14 0"/></svg>
+            </span>
+            我的
           </a>
         </nav>
       </aside>
@@ -48,24 +40,12 @@
       <section class="workspace">
         <header class="topbar">
           <div>
-            <p class="eyebrow">训练总览</p>
-            <h1>儿童 VB-MAPP 能力进阶工作台</h1>
+            <p class="eyebrow">我的</p>
+            <h1>基础信息与模型配置</h1>
           </div>
-          <button class="primary-action" type="button" id="recommendButton">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M5 10l7-7 7 7"/></svg>
-            下一步推荐
-          </button>
         </header>
 
         <section id="profile" class="profile-band">
-          <div class="profile-card">
-            <div class="avatar" aria-hidden="true" id="profileAvatar">林</div>
-            <div class="profile-copy">
-              <p class="section-kicker">儿童档案</p>
-              <h2 id="profileNameLine">林小舟，4岁2个月</h2>
-              <p id="profileLevelLine">当前 VB-MAPP 等级：Level 2 · 18-30个月能力</p>
-            </div>
-          </div>
           <form class="profile-form" id="profileForm">
             <label>
               姓名
@@ -85,7 +65,7 @@
             </label>
             <button class="secondary-action" type="submit">保存</button>
           </form>
-          <div class="overall-panel">
+          <a class="overall-panel overall-link" href="overview.html" aria-label="查看进度总览">
             <div>
               <span class="metric-label">总体进度</span>
               <strong id="overallProgress">0%</strong>
@@ -93,90 +73,62 @@
             <div class="progress-track" aria-label="总体进度">
               <span id="overallBar"></span>
             </div>
-          </div>
+          </a>
+          <button class="danger-action" type="button" id="resetProgressButton">重置全部项目进度</button>
         </section>
 
-        <section id="overview" class="dashboard-grid">
-          <article class="panel wide">
-            <div class="panel-header">
-              <div>
-                <p class="section-kicker">进度总览</p>
-                <h2>各领域完成率</h2>
-              </div>
-              <div class="segmented" role="tablist" aria-label="Level filter">
-                <button class="segment active" type="button" data-level="all">全部</button>
-                <button class="segment" type="button" data-level="1">L1</button>
-                <button class="segment" type="button" data-level="2">L2</button>
-                <button class="segment" type="button" data-level="3">L3</button>
-              </div>
-            </div>
-            <div class="domain-list" id="domainList"></div>
-          </article>
-
-          <article class="panel domain-detail-panel" id="domainDetailPanel">
-            <div class="panel-header">
-              <div>
-                <p class="section-kicker">分类详情</p>
-                <h2 id="domainDetailTitle">选择一个领域</h2>
-              </div>
-            </div>
-            <div class="domain-detail-list" id="domainDetailList">
-              <p class="empty-note">点击左侧完成率中的任一领域，查看此分类下所有子任务。</p>
-            </div>
-          </article>
-
-          <article class="panel">
-            <div class="panel-header">
-              <div>
-                <p class="section-kicker">当前缺失技能</p>
-                <h2>优先补齐</h2>
-              </div>
-            </div>
-            <ul class="skill-list" id="missingSkills"></ul>
-          </article>
-
-          <article class="panel">
-            <div class="panel-header">
-              <div>
-                <p class="section-kicker">最近进步项目</p>
-                <h2>本周变化</h2>
-              </div>
-            </div>
-            <ul class="activity-list" id="recentWins"></ul>
-          </article>
-        </section>
-
-        <section id="programs" class="panel program-panel">
+        <section class="panel recommendation-config">
           <div class="panel-header">
             <div>
-              <p class="section-kicker">训练项目</p>
-              <h2>按 VB-MAPP Level 查看项目</h2>
+              <p class="section-kicker">模型配置</p>
+              <h2>国产大模型 API</h2>
             </div>
-            <label class="search-box">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.3-4.3"/><circle cx="11" cy="11" r="7"/></svg>
-              <input id="programSearch" type="search" placeholder="搜索领域或项目" />
+          </div>
+
+          <form class="ai-form" id="aiConfigForm">
+            <label>
+              服务商
+              <select id="aiProviderInput">
+                <option value="qwen">Qwen-VL / DashScope</option>
+                <option value="deepseek">DeepSeek</option>
+                <option value="custom">自定义 OpenAI 兼容接口</option>
+              </select>
             </label>
-          </div>
-          <div class="level-columns" id="programColumns"></div>
+            <label>
+              API 地址
+              <input id="aiEndpointInput" type="url" autocomplete="off" />
+            </label>
+            <label>
+              模型
+              <input id="aiModelInput" type="text" autocomplete="off" />
+            </label>
+            <label>
+              API Key
+              <input id="aiKeyInput" type="password" autocomplete="off" placeholder="仅保存在本机" />
+            </label>
+            <button class="secondary-action" type="submit">保存模型配置</button>
+          </form>
+          <p class="empty-note" id="aiConfigStatus">推荐页会使用这里保存的模型配置。</p>
         </section>
 
-        <section id="progress" class="panel progress-panel">
-          <div class="panel-header">
+        <dialog class="reset-dialog" id="resetProgressDialog">
+          <form method="dialog" class="reset-dialog-body">
             <div>
-              <p class="section-kicker">项目进度</p>
-              <h2>状态流转</h2>
+              <p class="section-kicker">确认重置</p>
+              <h2>清空所有项目进度方格</h2>
+              <p class="empty-note" id="resetConfirmHint">请输入确认文本后继续。</p>
             </div>
-          </div>
-          <div class="status-board" id="statusBoard"></div>
-        </section>
-
-        <section class="recommendation-strip" aria-live="polite" id="recommendationStrip">
-          <div>
-            <p class="section-kicker">下一步推荐项目</p>
-            <h2 id="recommendationTitle">等待生成推荐</h2>
-          </div>
-          <p id="recommendationReason">点击右上角按钮，根据未掌握项目和领域完成率生成下一步训练建议。</p>
-        </section>
+            <label>
+              确认文本
+              <input id="resetConfirmInput" type="text" autocomplete="off" />
+            </label>
+            <p class="form-error" id="resetConfirmError" hidden>确认文本不匹配。</p>
+            <div class="dialog-actions">
+              <button class="secondary-action" type="button" id="cancelResetButton">取消</button>
+              <button class="danger-action" type="button" id="confirmResetButton">确认重置</button>
+            </div>
+          </form>
+        </dialog>
       </section>
     </main>
 

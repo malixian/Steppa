@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Steppa · 训练汇总</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <aside class="sidebar" aria-label="Steppa navigation">
+        <nav class="nav-list">
+          <a class="nav-item" href="recommendation.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3v3"/><path d="M21 12h-3"/><path d="M6 12H3"/><path d="m8 21 4-9 4 9"/><path d="M9.5 17h5"/></svg></span>项目推荐</a>
+          <a class="nav-item" href="overview.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 8-8"/><path d="M12 4v8h8"/></svg></span>进度总览</a>
+          <a class="nav-item" href="progress.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 19V5"/><path d="M8 17v-6M13 17V7M18 17v-3"/></svg></span>项目进度</a>
+          <a class="nav-item active" href="programs.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 4h14v16H5z"/><path d="M9 8h6M9 12h6M9 16h3"/></svg></span>训练汇总</a>
+          <a class="nav-item" href="index.html"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-7 8a7 7 0 0 1 14 0"/></svg></span>我的</a>
+        </nav>
+      </aside>
+
+      <section class="workspace">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">训练汇总</p>
+            <h1>按 Level 进入训练项目</h1>
+          </div>
+          <button class="primary-action" type="button" id="recommendButton">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M5 10l7-7 7 7"/></svg>
+            下一步推荐
+          </button>
+        </header>
+
+        <section id="programs" class="panel program-panel">
+          <div class="panel-header">
+            <div>
+              <p class="section-kicker">训练汇总</p>
+              <h2>Level 入口</h2>
+            </div>
+            <label class="search-box">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 21-4.3-4.3"/><circle cx="11" cy="11" r="7"/></svg>
+              <input id="programSearch" type="search" placeholder="搜索领域或项目" />
+            </label>
+          </div>
+          <div class="level-columns" id="programColumns"></div>
+        </section>
+
+        <section class="recommendation-strip" aria-live="polite" id="recommendationStrip">
+          <div>
+            <p class="section-kicker">下一步推荐项目</p>
+            <h2 id="recommendationTitle">等待生成推荐</h2>
+          </div>
+          <p id="recommendationReason">点击右上角按钮，根据未掌握项目和领域完成率生成下一步训练建议。</p>
+        </section>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
