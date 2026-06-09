@@ -8,6 +8,7 @@ $files = @(
   "progress.html",
   "programs.html",
   "recommendation.html",
+  "task.html",
   "styles.css",
   "app.js",
   "category.html",

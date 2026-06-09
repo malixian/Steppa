@@ -393,6 +393,7 @@ const programs = Object.entries(levelDomains).flatMap(([level, domains]) =>
       title,
       status: statusSeeds[level][index],
       updated: buildUpdate(Number(level), domainSpec.domain, index),
+      subgoals: buildProjectSubgoals(Number(level), domainSpec.domain, title),
     })),
   ),
 );
@@ -400,10 +401,15 @@ const programs = Object.entries(levelDomains).flatMap(([level, domains]) =>
 let activeLevel = "all";
 const pageLevel = Number(document.body.dataset.levelPage || 0);
 const isCategoryPage = document.body.dataset.categoryPage === "true";
+const isTaskPage = document.body.dataset.taskPage === "true";
 const categoryDomain =
   typeof window === "undefined"
     ? ""
     : new URLSearchParams(window.location.search).get("domain") || "";
+const taskId =
+  typeof window === "undefined"
+    ? ""
+    : new URLSearchParams(window.location.search).get("id") || "";
 
 const domainList = document.querySelector("#domainList");
 const domainDetailPanel = document.querySelector("#domainDetailPanel");
@@ -418,6 +424,9 @@ const overallProgress = document.querySelector("#overallProgress");
 const overallBar = document.querySelector("#overallBar");
 const recommendationTitle = document.querySelector("#recommendationTitle");
 const recommendationReason = document.querySelector("#recommendationReason");
+const taskTitle = document.querySelector("#taskTitle");
+const taskSubtitle = document.querySelector("#taskSubtitle");
+const taskStageList = document.querySelector("#taskStageList");
 const profileAvatar = document.querySelector("#profileAvatar");
 const profileNameLine = document.querySelector("#profileNameLine");
 const profileLevelLine = document.querySelector("#profileLevelLine");
@@ -462,6 +471,40 @@ function buildUpdate(level, domain, index) {
     "建议作为下一阶段基线和教学目标",
   ];
   return `Level ${level} · ${domain} · ${notes[index]}`;
+}
+
+function buildProjectSubgoals(level, domain, title) {
+  return [
+    {
+      label: "阶段 1",
+      title: "建立基线反应",
+      criteria: `在${domain}训练中，能在高动机或高度支持下出现“${title}”的目标反应。`,
+    },
+    {
+      label: "阶段 2",
+      title: "提示下稳定完成",
+      criteria: `在成人示范、手势、视觉或语言提示下，连续多次完成“${title}”。`,
+    },
+    {
+      label: "阶段 3",
+      title: "减少提示后独立完成",
+      criteria: `提示明显减少后，能在结构化训练中独立完成“${title}”。`,
+    },
+    {
+      label: "阶段 4",
+      title: "跨材料与人员泛化",
+      criteria: `更换材料、地点或互动对象后，仍能完成“${title}”。`,
+    },
+    {
+      label: "阶段 5",
+      title: "自然情境维持",
+      criteria: `在日常活动或自然互动中主动、稳定地表现出“${title}”对应能力。`,
+    },
+  ].map((item, index) => ({
+    ...item,
+    stage: index + 1,
+    vbMappNote: `Level ${level} · ${domain} · 第 ${index + 1}/5 阶段`,
+  }));
 }
 
 function filteredPrograms() {
@@ -530,6 +573,68 @@ function completionBlockMarkup(item, interactive = false) {
   `;
 }
 
+function taskDetailUrl(item) {
+  return `task.html?id=${encodeURIComponent(item.id)}`;
+}
+
+function renderTaskDetailPage() {
+  if (!isTaskPage || !taskStageList) return;
+
+  const task = programs.find((item) => item.id === taskId);
+  if (!task) {
+    if (taskTitle) taskTitle.textContent = "未找到项目";
+    taskStageList.innerHTML = '<p class="empty-note">当前项目不存在或 id 无效。</p>';
+    return;
+  }
+
+  const completed = completionBlocksFor(task);
+  if (taskTitle) taskTitle.textContent = task.title;
+  if (taskSubtitle) {
+    taskSubtitle.textContent = `${task.id} · Level ${task.level} · ${task.domain} · 当前 ${completed}/5`;
+  }
+
+  taskStageList.innerHTML = `
+    <section class="panel task-summary-panel">
+      <div class="panel-header">
+        <div>
+          <p class="section-kicker">能力达成</p>
+          <h2>${completed === 5 ? "已达到完整能力" : `已达到 ${completed}/5 阶段`}</h2>
+        </div>
+        ${completionBlockMarkup(task, true)}
+      </div>
+    </section>
+    <section class="task-stage-list">
+      ${task.subgoals
+        .map((stage) => {
+          const achieved = completed >= stage.stage;
+          return `
+            <article class="task-stage-card ${achieved ? "achieved" : ""}">
+              <button class="stage-toggle" type="button" data-task-id="${task.id}" data-block-value="${stage.stage}">
+                <span>${stage.label}</span>
+                <strong>${stage.title}</strong>
+              </button>
+              <p>${stage.criteria}</p>
+              <span class="program-domain">${stage.vbMappNote}</span>
+              <span class="stage-state">${achieved ? "已达到" : "未达到"}</span>
+            </article>
+          `;
+        })
+        .join("")}
+    </section>
+  `;
+
+  taskStageList.querySelectorAll(".stage-toggle").forEach((button) => {
+    button.addEventListener("click", () => {
+      const selectedBlocks = Number(button.dataset.blockValue);
+      const currentBlocks = completionBlocksFor(task);
+      const nextBlocks = selectedBlocks === currentBlocks ? selectedBlocks - 1 : selectedBlocks;
+      saveProgressOverride(task.id, Math.max(0, Math.min(5, nextBlocks)));
+      renderTaskDetailPage();
+    });
+  });
+  bindCompletionButtons(taskStageList);
+}
+
 function renderOverview(items) {
   const overall = completionFor(programs);
   if (overallProgress) overallProgress.textContent = `${overall}%`;
@@ -589,7 +694,7 @@ function renderDomainDetail(items) {
       (item) => `
         <article class="domain-task">
           <div>
-            <strong>${item.title}</strong>
+            <a class="task-title-link" href="${taskDetailUrl(item)}"><strong>${item.title}</strong></a>
             <span class="program-domain">Level ${item.level} · ${item.status}</span>
           </div>
           ${completionBlockMarkup(item, true)}
@@ -819,7 +924,7 @@ function renderAiRecommendations(rawText = "") {
         <article class="domain-task recommended-project-card">
           <div>
             <span class="recommendation-rank">推荐 ${index + 1}</span>
-            <strong>${program.title}</strong>
+            <a class="task-title-link" href="${taskDetailUrl(program)}"><strong>${program.title}</strong></a>
             <span class="program-domain">${program.id} · Level ${program.level} · ${program.domain}</span>
             <span class="recommendation-reason">${escapeHtml(reason || "模型未返回此项目的单独原因。")}</span>
           </div>
@@ -861,10 +966,18 @@ function renderRecommendationHistory() {
   aiRecommendationHistory.innerHTML = history
     .map((entry) => {
       const items = entry.items
-        .map(({ id, reason }) => {
+        .map(({ id }) => {
           const program = programs.find((item) => item.id === id);
           if (!program) return "";
-          return `<li><strong>${program.title}</strong><span class="program-domain">${id} · Level ${program.level} · ${program.domain}</span>${reason ? `<span class="recommendation-reason">${escapeHtml(reason)}</span>` : ""}</li>`;
+          return `
+            <li class="history-project-row">
+              <div>
+                <a class="task-title-link" href="${taskDetailUrl(program)}"><strong>${program.title}</strong></a>
+                <span class="program-domain">${id} · Level ${program.level} · ${program.domain}</span>
+              </div>
+              ${completionBlockMarkup(program)}
+            </li>
+          `;
         })
         .join("");
 
@@ -1132,7 +1245,7 @@ function renderCategoryDetailPage(items) {
                 (item) => `
                   <article class="domain-task">
                     <div>
-                      <strong>${item.title}</strong>
+                      <a class="task-title-link" href="${taskDetailUrl(item)}"><strong>${item.title}</strong></a>
                       <span class="program-domain">Level ${item.level} · ${item.status}</span>
                     </div>
                     ${completionBlockMarkup(item, true)}
@@ -1204,10 +1317,10 @@ function renderLevelDetail(items) {
 function programCard(item) {
   return `
     <article class="program-card" data-status="${item.status}">
-      <div>
+      <a class="program-card-link" href="${taskDetailUrl(item)}">
         <span class="program-title">${item.title}</span>
         <span class="program-domain">${item.domain}</span>
-      </div>
+      </a>
       ${completionBlockMarkup(item)}
     </article>
   `;
@@ -1258,6 +1371,7 @@ function render() {
   renderOverview(items);
   renderPrograms(items);
   renderStatusBoard(items);
+  renderTaskDetailPage();
 }
 
 document.querySelectorAll(".segment").forEach((button) => {

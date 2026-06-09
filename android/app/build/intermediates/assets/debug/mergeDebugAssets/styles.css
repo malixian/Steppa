@@ -114,7 +114,7 @@ select {
 
 .nav-list {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 4px;
 }
 
@@ -400,6 +400,84 @@ svg {
   background: #fff;
 }
 
+.history-project-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.task-detail {
+  display: grid;
+  gap: 16px;
+}
+
+.task-summary-panel {
+  padding: 18px;
+}
+
+.task-stage-list {
+  display: grid;
+  gap: 12px;
+}
+
+.task-stage-card {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-left: 4px solid #cdd6dc;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.task-stage-card.achieved {
+  border-left-color: var(--teal);
+  background: #fbfcfb;
+}
+
+.stage-toggle {
+  display: grid;
+  gap: 4px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.stage-toggle span {
+  color: var(--teal);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.stage-toggle strong {
+  font-size: 1rem;
+}
+
+.task-stage-card p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.stage-state {
+  justify-self: start;
+  padding: 4px 8px;
+  border-radius: 999px;
+  color: var(--muted);
+  background: #edf1f3;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.task-stage-card.achieved .stage-state {
+  color: #fff;
+  background: var(--teal);
+}
+
 .request-status {
   display: flex;
   align-items: center;
@@ -409,6 +487,10 @@ svg {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: #f8faf8;
+}
+
+.request-status[hidden] {
+  display: none;
 }
 
 .request-status p {
@@ -824,6 +906,17 @@ svg {
   background: #fff;
 }
 
+.program-card-link,
+.task-title-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.program-card-link:hover,
+.task-title-link:hover {
+  color: var(--teal);
+}
+
 .program-card[data-status="未开始"] {
   border-left-color: var(--muted);
 }
@@ -992,6 +1085,7 @@ button.completion-block:focus-visible {
 
   .profile-form,
   .ai-form,
+  .history-project-row,
   .domain-task {
     grid-template-columns: 1fr;
   }

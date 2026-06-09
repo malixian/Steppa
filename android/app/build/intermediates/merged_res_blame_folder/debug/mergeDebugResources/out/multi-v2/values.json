@@ -6,6 +6,37 @@
                 {
                     "source": "C:\\Users\\Lixian\\Documents\\Steppa\\android\\app\\src\\main\\res\\values\\styles.xml",
                     "from": {
+                        "startLines": "-1",
+                        "startColumns": "-1",
+                        "startOffsets": "-1"
+                    },
+                    "to": {
+                        "startLines": "3",
+                        "startColumns": "4",
+                        "startOffsets": "112",
+                        "endLines": "8",
+                        "endColumns": "12",
+                        "endOffsets": "441"
+                    }
+                },
+                {
+                    "source": "C:\\Users\\Lixian\\Documents\\Steppa\\android\\app\\src\\main\\res\\values\\colors.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "56",
+                        "endOffsets": "107"
+                    }
+                }
+            ]
+        },
+        {
+            "outputFile": "C:\\Users\\Lixian\\.gradle\\daemon\\9.3.0\\com.malixian.steppa.app-mergeDebugResources-2:\\values\\values.xml",
+            "map": [
+                {
+                    "source": "C:\\Users\\Lixian\\Documents\\Steppa\\android\\app\\src\\main\\res\\values\\styles.xml",
+                    "from": {
                         "startLines": "2",
                         "startColumns": "4",
                         "startOffsets": "55",
